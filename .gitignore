@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Maven 构建产物与本地运行数据（上传文件等）
+backend/target/
+backend/data/
+
+# Flutter：补充 app/.gitignore 未覆盖的产物
+**/ephemeral/
+app/android/local.properties
+
+# vendored 子目录：内嵌 .git 的备份（需要恢复时改回 .git 即可）
+**/.git.bak/

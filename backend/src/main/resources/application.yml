@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: forhappy-server
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/forhappy?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:dms_user_simon}
+    password: ${DB_PASSWORD:maodou2026}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+forhappy:
+  like:
+    daily-quota: 30
+  jwt:
+    # 演示用密钥，生产环境必须改为环境变量注入
+    secret: ${JWT_SECRET:Zm9yaGFwcHktZGVtby1zZWNyZXQtMDEyMzQ1Njc4OWFiY2RlZg==}
+    expire-hours: 720
+  sms:
+    # 演示环境固定验证码
+    dev-code: "123456"
+  llm:
+    # 大模型接入（OpenAI 兼容协议；未配置 api-key 或调用失败时自动降级为本地模板建议）
+    # 默认指向智谱 GLM，可换任意兼容端点
+    base-url: ${LLM_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+    api-key: ${LLM_API_KEY:}
+    model: ${LLM_MODEL:glm-4-flash}
+    timeout-ms: 15000
+    # 每用户每日 AI 回复次数（后台可调，后续可作为 VIP 权益差异化配额）
+    daily-limit: 20
+  admin:
+    # 运营后台密钥（请求头 X-Admin-Key；生产环境改环境变量注入）
+    key: ${ADMIN_KEY:forhappy-admin}
