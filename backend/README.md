@@ -23,7 +23,7 @@ mvn spring-boot:run
 
 | 模块 | 接口 |
 |---|---|
-| 认证 | POST /auth/sms-code、POST /auth/login（返回 onboarded 标志）、POST /auth/onboarding（校验 ≥18 岁，写城市中心坐标）、POST /auth/deactivate（注销→7 天冷静期，期间登录返回 403） |
+| 认证 | POST /auth/sms-code、POST /auth/login（返回 onboarded 标志）、POST /auth/onboarding（校验 ≥18 岁，写城市中心坐标）、POST /auth/deactivate（注销→7 天冷静期，期间登录返回 403；每日 04:30 定时任务硬删满 7 天的注销用户，`forhappy.cleanup.cron` 可配） |
 | 资料 | GET/PUT /profile/me、POST /profile/photos（isAvatar=true 同步头像）、PUT/DELETE /profile/photos/{id}（设头像/删除，删头像自动回退） |
 | 文件 | POST /upload（multipart 图片上传，≤10MB，jpg/png/webp/gif；存 `./data/uploads`，`/files/**` 静态访问——OSS 直传的本地替代） |
 | 发现 | GET /discover/feed?city=&sort=distance\|reco\|active&ageMin=&ageMax=&maxDist=&cursor=&limit=（年龄/距离筛选 + 游标分页 `{items,nextCursor:-1=末页}`；**reco=推荐排序**：`RecommendService` 实时打分 0.35距离+0.25兴趣交集+0.20活跃+0.20Elo，新用户24h×1.5加权，每页注入≥20%带外防信息茧房，设计§5）、GET /discover/matches |

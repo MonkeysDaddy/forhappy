@@ -157,6 +157,14 @@ public class SocialService {
     private final Map<String, java.util.concurrent.atomic.AtomicInteger> undoCounter =
             new java.util.concurrent.ConcurrentHashMap<>();
 
+    /** 每小时清扫昨日及更早的反悔计数 key（uid:日期 每天新增一批，不清扫会无限堆积） */
+    @org.springframework.scheduling.annotation.Scheduled(
+            fixedDelay = 3_600_000, initialDelay = 3_600_000)
+    public void sweepUndoCounters() {
+        String today = LocalDate.now().format(UNDO_DATE);
+        undoCounter.keySet().removeIf(k -> !k.endsWith(today));
+    }
+
     // ---------- 共同点与破冰话术（设计 4.6：配对时计算，最多 3 条共同点 + 3 条话术） ----------
 
     private static final ObjectMapper JSON = new ObjectMapper();

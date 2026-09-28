@@ -27,8 +27,6 @@ public class ChatController {
     private final MessageMapper messageMapper;
     private final LlmService llmService;
     private final ChatService chatService;
-    private final com.forhappy.common.SensitiveWordStore sensitiveWordStore;
-    private final com.forhappy.mapper.AdminManageMapper violationMapper;
 
     @GetMapping
     public Result<List<ConversationVO>> list() {
@@ -66,13 +64,7 @@ public class ChatController {
                 ? ((Number) body.get("type")).intValue() : null;
         String content = body.get("content") == null
                 ? "" : String.valueOf(body.get("content"));
-        // 动态敏感词拦截（事务外记录违规流水，管理后台可配）
-        String hit = sensitiveWordStore.hit(content);
-        if (hit != null) {
-            violationMapper.insertViolation(uid, "chat",
-                    content.length() > 500 ? content.substring(0, 500) : content, hit);
-            throw new com.forhappy.common.BizException(400, "消息包含违规内容，已被拦截");
-        }
+        // 敏感词拦截在 ChatService.send 内统一执行（与 WS 路径共用）
         return Result.ok(chatService.send(id, uid, type, content));
     }
 

@@ -23,11 +23,25 @@ public class ChatService {
     private final MessageMapper messageMapper;
     private final UserMapper userMapper;
     private final WsPushService wsPush;
+    private final com.forhappy.common.SensitiveWordStore sensitiveWordStore;
+    private final com.forhappy.mapper.AdminManageMapper violationMapper;
 
     private static final ObjectMapper JSON = new ObjectMapper();
 
-    @Transactional
+    /**
+     * noRollbackFor：敏感词命中时违规流水必须落库（供后台处置），
+     * 不能随拦截抛出的 BizException 一起回滚；此前未写入的数据不受影响。
+     */
+    @Transactional(noRollbackFor = BizException.class)
     public Message send(long convId, long uid, Integer typeIn, String contentIn) {
+        // 动态敏感词拦截（HTTP 与 WS 统一在此检查，避免两条路径风控不一致）
+        String hit = sensitiveWordStore.hit(contentIn);
+        if (hit != null) {
+            violationMapper.insertViolation(uid, "chat",
+                    contentIn != null && contentIn.length() > 500
+                            ? contentIn.substring(0, 500) : contentIn, hit);
+            throw new BizException(400, "消息包含违规内容，已被拦截");
+        }
         if (conversationMapper.findMine(convId, uid) == null) {
             throw new BizException(403, "无权访问该会话");
         }

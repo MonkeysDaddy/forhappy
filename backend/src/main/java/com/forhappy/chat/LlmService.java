@@ -71,6 +71,14 @@ public class LlmService {
     /** 单机内存配额计数（演示环境够用；多实例部署换 Redis） */
     private final Map<String, AtomicInteger> dailyCounter = new ConcurrentHashMap<>();
 
+    /** 每小时清扫昨日及更早的配额 key（uid:日期 每天新增一批，不清扫会无限堆积） */
+    @org.springframework.scheduling.annotation.Scheduled(
+            fixedDelay = 3_600_000, initialDelay = 3_600_000)
+    public void sweepDailyCounters() {
+        String today = LocalDate.now().format(DATE_KEY);
+        dailyCounter.keySet().removeIf(k -> !k.endsWith(today));
+    }
+
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .build();

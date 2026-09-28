@@ -130,6 +130,15 @@ const routes: RouteRecordRaw[] = [
     path: '/admin-ops',
     children: [
       {
+        name: 'AdminNotices',
+        path: '/admin/notices',
+        component: () => import('#/views/admin/notices.vue'),
+        meta: {
+          icon: 'lucide:bell-ring',
+          title: '公告群发',
+        },
+      },
+      {
         name: 'AdminAds',
         path: '/admin/ads',
         component: () => import('#/views/admin/ads.vue'),

@@ -39,4 +39,12 @@ public class AdminSessionStore {
     public void revokeAll() {
         sessions.clear();
     }
+
+    /** 每小时清扫过期会话：validate 只清理被再次访问的 token，不再访问的会永久残留 */
+    @org.springframework.scheduling.annotation.Scheduled(
+            fixedDelay = 3_600_000, initialDelay = 3_600_000)
+    public void sweepExpired() {
+        Instant now = Instant.now();
+        sessions.values().removeIf(s -> s.expiresAt().isBefore(now));
+    }
 }
